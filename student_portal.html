@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EduPortal — Student Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0d0f14;--surface:#13161e;--surface2:#1a1e28;--border:rgba(255,255,255,0.07);--accent:#4f8ef7;--accent2:#a78bfa;--accent3:#34d399;--accent4:#fb923c;--text:#e8eaf0;--muted:#6b7280;--danger:#f87171;--card-radius:16px;--sidebar-w:240px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.screen{display:none;}
+.screen.active{display:flex;}
+
+/* LANDING */
+#screen-landing{min-height:100vh;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(79,142,247,0.12) 0%,transparent 70%),radial-gradient(ellipse 60% 40% at 80% 100%,rgba(167,139,250,0.08) 0%,transparent 60%),var(--bg);padding:24px;}
+.landing-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:2.4rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;text-align:center;}
+.landing-tagline{color:var(--muted);font-size:0.95rem;margin-bottom:52px;text-align:center;}
+.landing-cards{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;max-width:720px;width:100%;}
+.role-card{flex:1;min-width:260px;max-width:320px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px 28px;text-align:center;cursor:pointer;transition:all 0.3s;position:relative;overflow:hidden;}
+.role-card::before{content:'';position:absolute;inset:0;border-radius:20px;opacity:0;transition:opacity 0.3s;}
+.role-card.sc::before{background:radial-gradient(circle at 50% 0%,rgba(79,142,247,0.15),transparent 70%);}
+.role-card.ac::before{background:radial-gradient(circle at 50% 0%,rgba(167,139,250,0.15),transparent 70%);}
+.role-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,0.14);}
+.role-card:hover::before{opacity:1;}
+.role-icon{font-size:3rem;margin-bottom:16px;}
+.role-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:8px;}
+.role-desc{font-size:0.84rem;color:var(--muted);line-height:1.6;margin-bottom:24px;}
+.role-btn{display:inline-block;padding:11px 32px;border-radius:10px;font-size:0.88rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;border:none;transition:all 0.2s;}
+.role-btn.blue{background:linear-gradient(135deg,var(--accent),#3b7dd8);color:#fff;}
+.role-btn.purple{background:linear-gradient(135deg,var(--accent2),#7c5cd8);color:#fff;}
+.role-btn:hover{opacity:0.88;transform:scale(1.03);}
+
+/* AUTH */
+#screen-student-auth,#screen-admin-auth{min-height:100vh;align-items:center;justify-content:center;flex-direction:column;padding:24px;}
+#screen-student-auth{background:radial-gradient(ellipse 70% 50% at 30% 30%,rgba(79,142,247,0.1) 0%,transparent 60%),var(--bg);}
+#screen-admin-auth{background:radial-gradient(ellipse 70% 50% at 70% 30%,rgba(167,139,250,0.1) 0%,transparent 60%),var(--bg);}
+.auth-box{width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px 32px;}
+.auth-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
+.auth-sub{color:var(--muted);font-size:0.82rem;margin-bottom:28px;}
+.auth-tabs{display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;margin-bottom:28px;}
+.auth-tab{flex:1;text-align:center;padding:9px;border-radius:8px;font-size:0.85rem;font-weight:500;color:var(--muted);cursor:pointer;transition:all 0.2s;}
+.auth-tab.active{background:var(--bg);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.3);}
+.form-group{margin-bottom:18px;}
+.form-label{font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);display:block;margin-bottom:7px;}
+.form-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:0.92rem;color:var(--text);transition:border-color 0.2s;outline:none;}
+.form-input:focus{border-color:rgba(79,142,247,0.5);}
+.form-input::placeholder{color:var(--muted);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.auth-btn{width:100%;padding:13px;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.2s;margin-top:4px;}
+.auth-btn.blue{background:linear-gradient(135deg,var(--accent),#3b7dd8);color:#fff;}
+.auth-btn.purple{background:linear-gradient(135deg,var(--accent2),#7c5cd8);color:#fff;}
+.auth-btn:hover{opacity:0.88;}
+.auth-back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:0.82rem;cursor:pointer;margin-bottom:20px;transition:color 0.2s;}
+.auth-back:hover{color:var(--text);}
+.auth-err{background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.25);border-radius:8px;color:var(--danger);font-size:0.82rem;padding:10px 14px;margin-bottom:16px;display:none;}
+.auth-ok{background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25);border-radius:8px;color:var(--accent3);font-size:0.82rem;padding:10px 14px;margin-bottom:16px;display:none;}
+.admin-hint{background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);border-radius:8px;padding:10px 14px;margin-bottom:20px;font-size:0.82rem;color:var(--accent2);}
+
+/* DASHBOARD */
+#screen-student-dash,#screen-admin-dash{flex-direction:row;min-height:100vh;}
+.sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform 0.3s ease;}
+.sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid var(--border);}
+.sidebar-logo span{font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sidebar-logo small{display:block;color:var(--muted);font-size:0.72rem;margin-top:2px;letter-spacing:0.05em;}
+.sidebar-nav{padding:16px 12px;flex:1;}
+.nav-lbl{font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:10px 12px 6px;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;font-size:0.9rem;font-weight:500;color:var(--muted);cursor:pointer;transition:all 0.2s;margin-bottom:2px;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:rgba(79,142,247,0.12);color:var(--accent);}
+.nav-item.aactive{background:rgba(167,139,250,0.12);color:var(--accent2);}
+.nav-item .icon{font-size:1.1rem;width:22px;text-align:center;}
+.nbadge{margin-left:auto;background:var(--accent);color:#fff;font-size:0.65rem;padding:2px 7px;border-radius:20px;font-weight:600;}
+.nbadge.p{background:var(--accent2);}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.av-sm{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Syne',sans-serif;font-size:0.85rem;flex-shrink:0;}
+.av-sm.adm{background:linear-gradient(135deg,var(--accent2),#7c5cd8);}
+.sf-info{flex:1;overflow:hidden;}
+.sf-name{font-size:0.85rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sf-id{font-size:0.72rem;color:var(--muted);}
+.logout-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:4px;border-radius:6px;transition:color 0.2s;}
+.logout-btn:hover{color:var(--danger);}
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{height:64px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;background:var(--bg);position:sticky;top:0;z-index:50;gap:16px;}
+.tb-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.15rem;flex:1;}
+.tb-pill{font-size:0.75rem;padding:4px 12px;border-radius:20px;font-weight:500;}
+.tb-pill.g{background:rgba(52,211,153,0.12);color:var(--accent3);}
+.tb-pill.p{background:rgba(167,139,250,0.12);color:var(--accent2);}
+.hamburger{display:none;background:none;border:none;cursor:pointer;color:var(--text);font-size:1.4rem;margin-right:8px;}
+.content{padding:32px;flex:1;}
+.section{display:none;animation:fadeUp 0.35s ease;}
+.section.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.sec-h{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;margin-bottom:6px;}
+.sec-sub{color:var(--muted);font-size:0.9rem;margin-bottom:28px;}
+.chip{padding:3px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;}
+.chip.g{background:rgba(52,211,153,0.12);color:var(--accent3);}
+.chip.b{background:rgba(79,142,247,0.12);color:var(--accent);}
+.chip.o{background:rgba(251,146,60,0.12);color:var(--accent4);}
+.chip.r{background:rgba(248,113,113,0.12);color:var(--danger);}
+.chip.p{background:rgba(167,139,250,0.12);color:var(--accent2);}
+
+/* ID CARD */
+.id-wrap{display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap;}
+.id-card{width:340px;min-width:280px;background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;flex-shrink:0;}
+.id-hdr{background:linear-gradient(135deg,#1a2a4a,#0d1a3a);padding:20px 24px 16px;position:relative;overflow:hidden;}
+.id-hdr::before{content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;border-radius:50%;background:rgba(79,142,247,0.15);}
+.id-hdr::after{content:'';position:absolute;bottom:-20px;left:20px;width:80px;height:80px;border-radius:50%;background:rgba(167,139,250,0.1);}
+.id-school{font-family:'Syne',sans-serif;font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-bottom:2px;}
+.id-dept{color:rgba(255,255,255,0.55);font-size:0.8rem;}
+.id-body{padding:20px 24px 24px;}
+.id-av-row{display:flex;gap:16px;align-items:center;margin-bottom:20px;}
+.id-av{width:72px;height:72px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;border:3px solid rgba(79,142,247,0.4);flex-shrink:0;}
+.id-name{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:700;}
+.id-course{font-size:0.82rem;color:var(--muted);margin-top:3px;}
+.id-yr span{background:rgba(79,142,247,0.12);color:var(--accent);padding:2px 10px;border-radius:20px;font-weight:500;font-size:0.78rem;}
+.id-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.id-field label{font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px;}
+.id-field span{font-size:0.85rem;font-weight:500;}
+.id-bc{margin-top:20px;border-top:1px solid var(--border);padding-top:16px;display:flex;justify-content:space-between;align-items:center;}
+.bc-lines{display:flex;gap:2px;height:28px;align-items:flex-end;}
+.bc-lines span{display:inline-block;background:var(--muted);border-radius:1px;width:2px;}
+.sdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent3);margin-right:5px;}
+.id-info{flex:1;min-width:240px;}
+.id-info h3{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:16px;}
+.irow{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);font-size:0.88rem;}
+.irow:last-child{border-bottom:none;}
+.irow-lbl{color:var(--muted);}
+.irow-val{font-weight:500;}
+
+/* PERSONAL */
+.pg{display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start;}
+.prof-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);padding:28px 24px;text-align:center;}
+.prof-av{width:88px;height:88px;border-radius:50%;margin:0 auto 14px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;border:4px solid rgba(79,142,247,0.3);}
+.prof-name{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;}
+.prof-id{color:var(--muted);font-size:0.82rem;margin-top:4px;}
+.pdiv{border:none;border-top:1px solid var(--border);margin:18px 0;}
+.pstat{margin-bottom:14px;}
+.pstat-lbl{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;}
+.pstat-val{font-size:0.9rem;font-weight:500;}
+.edit-btn{display:block;width:100%;margin-top:18px;background:rgba(79,142,247,0.1);color:var(--accent);border:1px solid rgba(79,142,247,0.25);border-radius:10px;padding:10px;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:500;cursor:pointer;transition:all 0.2s;}
+.edit-btn:hover{background:rgba(79,142,247,0.2);}
+.pdet{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);overflow:hidden;margin-bottom:20px;}
+.pdet:last-child{margin-bottom:0;}
+.pdet-title{padding:16px 24px;font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:700;background:var(--surface2);border-bottom:1px solid var(--border);}
+.pdet-grid{display:grid;grid-template-columns:1fr 1fr;}
+.pf{padding:16px 24px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);}
+.pf:nth-child(even){border-right:none;}
+.pf:last-child,.pf:nth-last-child(2){border-bottom:none;}
+.pf label{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);display:block;margin-bottom:5px;}
+.pf span{font-size:0.9rem;font-weight:500;}
+
+/* DOCS */
+.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
+.doc-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);padding:20px;cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;gap:12px;}
+.doc-card:hover{border-color:rgba(79,142,247,0.4);background:var(--surface2);transform:translateY(-2px);}
+.doc-icon{font-size:2rem;}
+.doc-name{font-weight:600;font-size:0.9rem;}
+.doc-meta{font-size:0.78rem;color:var(--muted);}
+.doc-footer{display:flex;justify-content:space-between;align-items:center;margin-top:auto;}
+.doc-sz{font-size:0.75rem;color:var(--muted);}
+.dl-btn{background:rgba(79,142,247,0.1);color:var(--accent);border:1px solid rgba(79,142,247,0.2);border-radius:8px;padding:5px 12px;font-size:0.78rem;font-weight:500;cursor:pointer;transition:all 0.2s;}
+.dl-btn:hover{background:rgba(79,142,247,0.25);}
+.upload-z{border:2px dashed rgba(79,142,247,0.3);border-radius:var(--card-radius);padding:32px;text-align:center;margin-top:24px;cursor:pointer;transition:all 0.2s;}
+.upload-z:hover{border-color:var(--accent);background:rgba(79,142,247,0.04);}
+.upload-z p{color:var(--muted);font-size:0.88rem;margin-top:8px;}
+
+/* FEES */
+.fees-top{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:28px;}
+.fee-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);padding:22px;}
+.fee-lbl{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:8px;}
+.fee-amt{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;}
+.fee-stat.paid .fee-amt{color:var(--accent3);}
+.fee-stat.due .fee-amt{color:var(--danger);}
+.fpbar{width:100%;height:6px;background:rgba(255,255,255,0.07);border-radius:99px;margin-top:10px;overflow:hidden;}
+.fpfill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent2));}
+.ftable{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);overflow:hidden;}
+.fth{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;padding:14px 24px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);}
+.frow{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;padding:16px 24px;border-bottom:1px solid var(--border);font-size:0.88rem;align-items:center;transition:background 0.15s;}
+.frow:hover{background:var(--surface2);}
+.frow:last-child{border-bottom:none;}
+.pay-btn{background:linear-gradient(135deg,var(--accent),#3b7dd8);color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.pay-btn:hover{opacity:0.85;}
+.paid-lbl{color:var(--accent3);font-size:0.8rem;font-weight:600;}
+
+/* ASSIGNMENTS */
+.af{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;}
+.fbtn{padding:7px 18px;border-radius:20px;font-size:0.82rem;font-weight:500;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;}
+.fbtn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.fbtn:hover:not(.active){border-color:rgba(255,255,255,0.2);color:var(--text);}
+.alist{display:flex;flex-direction:column;gap:14px;}
+.acard{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);padding:20px 24px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start;transition:all 0.2s;}
+.acard:hover{border-color:rgba(255,255,255,0.12);}
+.acard.overdue{border-left:3px solid var(--danger);}
+.acard.submitted{border-left:3px solid var(--accent3);}
+.acard.pending{border-left:3px solid var(--accent4);}
+.asubj{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:5px;}
+.atitle{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:6px;}
+.adesc{font-size:0.84rem;color:var(--muted);line-height:1.5;}
+.afooter{display:flex;gap:16px;align-items:center;margin-top:12px;flex-wrap:wrap;}
+.afooter span{font-size:0.78rem;color:var(--muted);}
+.afooter strong{color:var(--text);font-weight:500;}
+.aacts{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.sbtn{background:rgba(79,142,247,0.12);color:var(--accent);border:1px solid rgba(79,142,247,0.25);border-radius:8px;padding:8px 18px;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.sbtn:hover{background:rgba(79,142,247,0.25);}
+.grade{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--accent3);}
+
+/* ADMIN */
+.astats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:28px;}
+.astat{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);padding:20px;}
+.astat-icon{font-size:1.8rem;margin-bottom:10px;}
+.astat-val{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;}
+.astat-lbl{font-size:0.78rem;color:var(--muted);margin-top:3px;}
+.stable-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);overflow:hidden;}
+.sth{display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1fr;padding:14px 24px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);}
+.srow{display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1fr;padding:15px 24px;border-bottom:1px solid var(--border);font-size:0.88rem;align-items:center;transition:background 0.15s;}
+.srow:hover{background:var(--surface2);}
+.srow:last-child{border-bottom:none;}
+.srow-name{font-weight:500;}
+.srow-id{font-size:0.78rem;color:var(--muted);}
+.abtn{background:none;border:1px solid var(--border);border-radius:7px;padding:5px 12px;font-size:0.78rem;color:var(--muted);cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;}
+.abtn:hover{border-color:rgba(255,255,255,0.2);color:var(--text);}
+.abtn.del:hover{border-color:rgba(248,113,113,0.4);color:var(--danger);}
+.srch-bar{display:flex;gap:12px;margin-bottom:20px;}
+.srch-bar input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--text);outline:none;transition:border-color 0.2s;}
+.srch-bar input:focus{border-color:rgba(167,139,250,0.5);}
+.srch-bar input::placeholder{color:var(--muted);}
+
+/* OVERLAY */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;}
+.overlay.show{display:block;}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  :root{--sidebar-w:0px;}
+  .sidebar{transform:translateX(-240px);width:240px;}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;}
+  .hamburger{display:block;}
+  .pg{grid-template-columns:1fr;}
+  .fees-top{grid-template-columns:1fr 1fr;}
+  .fth,.frow{grid-template-columns:2fr 1fr 1fr 1fr;}
+  .fth>*:nth-child(2),.frow>*:nth-child(2){display:none;}
+  .id-wrap{flex-direction:column;}
+  .id-card{width:100%;}
+  .astats{grid-template-columns:1fr 1fr;}
+  .sth,.srow{grid-template-columns:2fr 1fr 1fr;}
+  .sth>*:nth-child(2),.srow>*:nth-child(2),.sth>*:nth-child(3),.srow>*:nth-child(3){display:none;}
+}
+@media(max-width:580px){
+  .content{padding:20px 16px;}
+  .fees-top{grid-template-columns:1fr;}
+  .topbar{padding:0 16px;}
+  .acard{grid-template-columns:1fr;}
+  .aacts{flex-direction:row;align-items:center;}
+  .astats{grid-template-columns:1fr 1fr;}
+  .auth-box{padding:24px 20px;}
+  .form-row{grid-template-columns:1fr;}
+}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:99px;}
+</style>
+</head>
+<body>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ════ SCREEN: LANDING ════ -->
+<div class="screen active" id="screen-landing">
+  <div class="landing-logo">🎓 EduPortal</div>
+  <div class="landing-tagline">Student Management System — Greenwood University</div>
+  <div class="landing-cards">
+    <div class="role-card sc" onclick="goTo('screen-student-auth')">
+      <div class="role-icon">🧑‍🎓</div>
+      <div class="role-title">Student Portal</div>
+      <div class="role-desc">Access your ID card, personal records, documents, fees, and assignments in one secure place.</div>
+      <button class="role-btn blue">Login / Register</button>
+    </div>
+    <div class="role-card ac" onclick="goTo('screen-admin-auth')">
+      <div class="role-icon">🛡️</div>
+      <div class="role-title">Admin Panel</div>
+      <div class="role-desc">Manage all student accounts, view registrations, and oversee the entire institution.</div>
+      <button class="role-btn purple">Admin Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SCREEN: STUDENT AUTH ════ -->
+<div class="screen" id="screen-student-auth">
+  <span class="auth-back" onclick="goTo('screen-landing')">← Back to Home</span>
+  <div class="auth-box">
+    <div class="auth-logo">🎓 EduPortal</div>
+    <div class="auth-sub">Student Access — Greenwood University</div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Login</div>
+      <div class="auth-tab" id="tab-reg" onclick="switchTab('reg')">Register</div>
+    </div>
+    <div id="s-err" class="auth-err"></div>
+    <div id="s-ok" class="auth-ok"></div>
+
+    <!-- LOGIN -->
+    <div id="form-login">
+      <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="l-user" type="text" placeholder="Enter your username" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="l-pass" type="password" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <button class="auth-btn blue" onclick="doLogin()">Login to Portal</button>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="form-reg" style="display:none;">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">First Name</label><input class="form-input" id="r-fn" type="text" placeholder="First name"/></div>
+        <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" id="r-ln" type="text" placeholder="Last name"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="r-user" type="text" placeholder="Choose a username"/></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="r-email" type="email" placeholder="your@email.com"/></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Course</label><input class="form-input" id="r-course" type="text" placeholder="e.g. B.Tech CSE"/></div>
+        <div class="form-group"><label class="form-label">Year</label>
+          <select class="form-input" id="r-year" style="cursor:pointer;">
+            <option>1st Year</option><option>2nd Year</option><option selected>3rd Year</option><option>4th Year</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="r-pass" type="password" placeholder="Min 6 characters"/></div>
+      <div class="form-group"><label class="form-label">Confirm Password</label><input class="form-input" id="r-conf" type="password" placeholder="Repeat password"/></div>
+      <button class="auth-btn blue" onclick="doRegister()">Create My Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SCREEN: ADMIN AUTH ════ -->
+<div class="screen" id="screen-admin-auth">
+  <span class="auth-back" onclick="goTo('screen-landing')">← Back to Home</span>
+  <div class="auth-box">
+    <div class="auth-logo">🛡️ Admin Panel</div>
+    <div class="auth-sub">Restricted — Authorised personnel only</div>
+    <div class="admin-hint">🔐 Institutional administrator access only.</div>
+    <div id="a-err" class="auth-err"></div>
+    <div class="form-group"><label class="form-label">Admin Username</label><input class="form-input" id="a-user" type="text" placeholder="admin" onkeydown="if(event.key==='Enter')doAdminLogin()"/></div>
+    <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="a-pass" type="password" placeholder="admin123" onkeydown="if(event.key==='Enter')doAdminLogin()"/></div>
+    <button class="auth-btn purple" onclick="doAdminLogin()">Access Admin Panel</button>
+    <p style="font-size:0.75rem;color:var(--muted);margin-top:14px;text-align:center;">Demo credentials: <strong style="color:var(--text)">admin</strong> / <strong style="color:var(--text)">admin123</strong></p>
+  </div>
+</div>
+
+<!-- ════ SCREEN: STUDENT DASHBOARD ════ -->
+<div class="screen" id="screen-student-dash">
+  <nav class="sidebar" id="sb-stu">
+    <div class="sidebar-logo"><span>EduPortal</span><small>STUDENT MANAGEMENT SYSTEM</small></div>
+    <div class="sidebar-nav">
+      <div class="nav-lbl">Main</div>
+      <div class="nav-item active" onclick="showSec('idcard',this)"><span class="icon">🪪</span> ID Card</div>
+      <div class="nav-item" onclick="showSec('personal',this)"><span class="icon">👤</span> Personal Data</div>
+      <div class="nav-item" onclick="showSec('documents',this)"><span class="icon">📂</span> Documents</div>
+      <div class="nav-lbl" style="margin-top:8px">Academic</div>
+      <div class="nav-item" onclick="showSec('fees',this)"><span class="icon">💳</span> Fees <span class="nbadge">1 Due</span></div>
+      <div class="nav-item" onclick="showSec('assignments',this)"><span class="icon">📝</span> Assignments <span class="nbadge">3</span></div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="av-sm" id="stu-av">?</div>
+      <div class="sf-info"><div class="sf-name" id="stu-nm">—</div><div class="sf-id" id="stu-sid">—</div></div>
+      <button class="logout-btn" onclick="doLogout()" title="Logout">⏻</button>
+    </div>
+  </nav>
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" onclick="toggleSB('sb-stu')">☰</button>
+      <span class="tb-title" id="stu-tb">Student ID Card</span>
+      <span class="tb-pill g" id="stu-yr-pill">AY 2024–25</span>
+    </header>
+    <main class="content">
+
+      <!-- ID CARD -->
+      <section class="section active" id="sec-idcard">
+        <h2 class="sec-h">Student ID Card</h2>
+        <p class="sec-sub">Your official institutional identification</p>
+        <div class="id-wrap">
+          <div class="id-card">
+            <div class="id-hdr">
+              <div class="id-school">Greenwood University</div>
+              <div class="id-dept">Faculty of Computer Science & Engineering</div>
+            </div>
+            <div class="id-body">
+              <div class="id-av-row">
+                <div class="id-av" id="id-av">?</div>
+                <div>
+                  <div class="id-name" id="id-nm">—</div>
+                  <div class="id-course" id="id-course">—</div>
+                  <div class="id-yr" style="margin-top:6px"><span id="id-yr">—</span></div>
+                </div>
+              </div>
+              <div class="id-fields">
+                <div class="id-field"><label>Student ID</label><span id="id-sid">—</span></div>
+                <div class="id-field"><label>Roll No.</label><span id="id-roll">—</span></div>
+                <div class="id-field"><label>Valid Until</label><span>May 2026</span></div>
+                <div class="id-field"><label>Section</label><span id="id-sec">CS-3B</span></div>
+              </div>
+              <div class="id-bc">
+                <div class="bc-lines">
+                  <span style="height:100%"></span><span style="height:70%"></span><span style="height:85%"></span><span style="height:60%"></span><span style="height:100%"></span><span style="height:75%"></span><span style="height:90%"></span><span style="height:55%"></span><span style="height:100%"></span><span style="height:65%"></span><span style="height:80%"></span><span style="height:100%"></span><span style="height:70%"></span><span style="height:45%"></span><span style="height:100%"></span><span style="height:75%"></span><span style="height:85%"></span><span style="height:60%"></span><span style="height:100%"></span><span style="height:55%"></span>
+                </div>
+                <div><span class="sdot"></span><span style="font-size:0.78rem;color:var(--accent3);font-weight:500">Active</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="id-info">
+            <h3>Card Details</h3>
+            <div class="irow"><span class="irow-lbl">Card Status</span><span class="chip g">Active</span></div>
+            <div class="irow"><span class="irow-lbl">Issue Date</span><span class="irow-val" id="id-iss">—</span></div>
+            <div class="irow"><span class="irow-lbl">Expiry Date</span><span class="irow-val">May 31, 2026</span></div>
+            <div class="irow"><span class="irow-lbl">Academic Year</span><span class="chip b">2024–25</span></div>
+            <div class="irow"><span class="irow-lbl">Hostel Access</span><span class="chip g">Enabled</span></div>
+            <div class="irow"><span class="irow-lbl">Library Access</span><span class="chip g">Enabled</span></div>
+            <div class="irow"><span class="irow-lbl">Lab Access</span><span class="chip o">Limited</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PERSONAL -->
+      <section class="section" id="sec-personal">
+        <h2 class="sec-h">Personal Data</h2>
+        <p class="sec-sub">Your academic and personal records — protected and confidential</p>
+        <div class="pg">
+          <div class="prof-card">
+            <div class="prof-av" id="pav">?</div>
+            <div class="prof-name" id="pnm">—</div>
+            <div class="prof-id" id="psid">—</div>
+            <hr class="pdiv"/>
+            <div class="pstat"><div class="pstat-lbl">Programme</div><div class="pstat-val" id="p-course">—</div></div>
+            <div class="pstat"><div class="pstat-lbl">Current Year</div><div class="pstat-val" id="p-yr">—</div></div>
+            <div class="pstat"><div class="pstat-lbl">CGPA</div><div class="pstat-val">8.72 / 10.0</div></div>
+            <div class="pstat"><div class="pstat-lbl">Attendance</div><div class="pstat-val">87.4%</div></div>
+            <button class="edit-btn">✏️ Request Data Update</button>
+          </div>
+          <div>
+            <div class="pdet">
+              <div class="pdet-title">👤 Personal Information</div>
+              <div class="pdet-grid">
+                <div class="pf"><label>Full Name</label><span id="p-fullname">—</span></div>
+                <div class="pf"><label>Date of Birth</label><span>14 March 2002</span></div>
+                <div class="pf"><label>Gender</label><span>Not specified</span></div>
+                <div class="pf"><label>Nationality</label><span>Indian</span></div>
+                <div class="pf"><label>Blood Group</label><span>O+</span></div>
+                <div class="pf"><label>Aadhaar / ID</label><span>•••• •••• 7823</span></div>
+              </div>
+            </div>
+            <div class="pdet">
+              <div class="pdet-title">📬 Contact Information</div>
+              <div class="pdet-grid">
+                <div class="pf"><label>Email</label><span id="p-email">—</span></div>
+                <div class="pf"><label>Phone</label><span>+91 98765 ••••1</span></div>
+                <div class="pf"><label>Address</label><span>42 Maple Street, Mumbai 400001</span></div>
+                <div class="pf"><label>State</label><span>Maharashtra</span></div>
+              </div>
+            </div>
+            <div class="pdet">
+              <div class="pdet-title">👨‍👩‍👦 Guardian Details</div>
+              <div class="pdet-grid">
+                <div class="pf"><label>Guardian Name</label><span>—</span></div>
+                <div class="pf"><label>Relation</label><span>—</span></div>
+                <div class="pf"><label>Contact</label><span>—</span></div>
+                <div class="pf"><label>Email</label><span>—</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DOCUMENTS -->
+      <section class="section" id="sec-documents">
+        <h2 class="sec-h">Documents</h2>
+        <p class="sec-sub">Access, download, or upload your official academic documents</p>
+        <div class="doc-grid">
+          <div class="doc-card"><div class="doc-icon">📜</div><div class="doc-name">Admission Letter</div><div class="doc-meta">Issued: Aug 2024 · Official</div><div class="doc-footer"><span class="doc-sz">256 KB</span><button class="dl-btn">⬇ Download</button></div></div>
+          <div class="doc-card"><div class="doc-icon">🎓</div><div class="doc-name">Enrollment Certificate</div><div class="doc-meta">AY 2024–25 · Active</div><div class="doc-footer"><span class="doc-sz">180 KB</span><button class="dl-btn">⬇ Download</button></div></div>
+          <div class="doc-card"><div class="doc-icon">📋</div><div class="doc-name">Semester 5 Marksheet</div><div class="doc-meta">Nov 2024 · Verified</div><div class="doc-footer"><span class="doc-sz">320 KB</span><button class="dl-btn">⬇ Download</button></div></div>
+          <div class="doc-card"><div class="doc-icon">📋</div><div class="doc-name">Semester 4 Marksheet</div><div class="doc-meta">May 2024 · Verified</div><div class="doc-footer"><span class="doc-sz">310 KB</span><button class="dl-btn">⬇ Download</button></div></div>
+          <div class="doc-card"><div class="doc-icon">🏥</div><div class="doc-name">Medical Certificate</div><div class="doc-meta">Feb 2024 · Uploaded</div><div class="doc-footer"><span class="doc-sz">95 KB</span><button class="dl-btn">⬇ Download</button></div></div>
+          <div class="doc-card"><div class="doc-icon">🏆</div><div class="doc-name">Scholarship Letter</div><div class="doc-meta">Sep 2023 · Merit Based</div><div class="doc-footer"><span class="doc-sz">140 KB</span><button class="dl-btn">⬇ Download</button></div></div>
+        </div>
+        <div class="upload-z"><div style="font-size:2.5rem">☁️</div><strong style="font-size:0.9rem">Upload a Document</strong><p>Drag & drop files here, or click to browse. PDF, JPG, PNG — max 5 MB</p></div>
+      </section>
+
+      <!-- FEES -->
+      <section class="section" id="sec-fees">
+        <h2 class="sec-h">Fees & Payments</h2>
+        <p class="sec-sub">Track tuition, dues, and payment history</p>
+        <div class="fees-top">
+          <div class="fee-stat"><div class="fee-lbl">Total Fees (AY 24–25)</div><div class="fee-amt">₹1,20,000</div><div class="fpbar"><div class="fpfill" style="width:75%"></div></div><div style="font-size:0.75rem;color:var(--muted);margin-top:5px">75% paid</div></div>
+          <div class="fee-stat paid"><div class="fee-lbl">Amount Paid</div><div class="fee-amt">₹90,000</div><div style="font-size:0.8rem;color:var(--muted);margin-top:8px">Last: Jan 10, 2025</div></div>
+          <div class="fee-stat due"><div class="fee-lbl">Outstanding Due</div><div class="fee-amt">₹30,000</div><div style="font-size:0.8rem;color:var(--muted);margin-top:8px">Due: Mar 31, 2025</div></div>
+        </div>
+        <div class="ftable">
+          <div class="fth"><span>Fee Description</span><span>Category</span><span>Due Date</span><span>Amount</span><span>Action</span></div>
+          <div class="frow"><span>Tuition Fee — Sem 6</span><span><span class="chip b">Tuition</span></span><span>Mar 31, 2025</span><span style="font-weight:600">₹25,000</span><span><button class="pay-btn">Pay Now</button></span></div>
+          <div class="frow"><span>Library Development Fee</span><span><span class="chip o">Library</span></span><span>Mar 31, 2025</span><span style="font-weight:600">₹5,000</span><span><button class="pay-btn">Pay Now</button></span></div>
+          <div class="frow"><span>Tuition Fee — Sem 5</span><span><span class="chip b">Tuition</span></span><span>Oct 01, 2024</span><span style="font-weight:600">₹25,000</span><span><span class="paid-lbl">✓ Paid</span></span></div>
+          <div class="frow"><span>Hostel Fee — 2024</span><span><span class="chip p">Hostel</span></span><span>Aug 15, 2024</span><span style="font-weight:600">₹40,000</span><span><span class="paid-lbl">✓ Paid</span></span></div>
+          <div class="frow"><span>Exam Fee — Sem 5</span><span><span class="chip o">Exam</span></span><span>Sep 15, 2024</span><span style="font-weight:600">₹2,000</span><span><span class="paid-lbl">✓ Paid</span></span></div>
+          <div class="frow"><span>Sports & Activities Fee</span><span><span class="chip g">Misc</span></span><span>Aug 01, 2024</span><span style="font-weight:600">₹3,000</span><span><span class="paid-lbl">✓ Paid</span></span></div>
+        </div>
+      </section>
+
+      <!-- ASSIGNMENTS -->
+      <section class="section" id="sec-assignments">
+        <h2 class="sec-h">Assignments</h2>
+        <p class="sec-sub">Manage, submit, and track all your coursework</p>
+        <div class="af">
+          <button class="fbtn active" onclick="filterA('all',this)">All (5)</button>
+          <button class="fbtn" onclick="filterA('pending',this)">⏳ Pending (2)</button>
+          <button class="fbtn" onclick="filterA('submitted',this)">✅ Submitted (2)</button>
+          <button class="fbtn" onclick="filterA('overdue',this)">🔴 Overdue (1)</button>
+        </div>
+        <div class="alist">
+          <div class="acard pending" data-s="pending">
+            <div><div class="asubj">CS-604 · Operating Systems</div><div class="atitle">Memory Management Algorithms — Comparative Study</div><div class="adesc">Write a 2000-word comparative analysis of paging, segmentation, and virtual memory management with code examples in C.</div><div class="afooter"><span>📅 Due: <strong>Mar 28, 2025</strong></span><span>📎 Max: <strong>20 marks</strong></span><span>👨‍🏫 Dr. Priya Nair</span></div></div>
+            <div class="aacts"><button class="sbtn">↑ Submit</button><span class="chip o">Pending</span></div>
+          </div>
+          <div class="acard overdue" data-s="overdue">
+            <div><div class="asubj">CS-602 · DBMS</div><div class="atitle">SQL Query Optimisation Report</div><div class="adesc">Analyse and document 10 query optimisation strategies in MySQL with benchmark results.</div><div class="afooter"><span>📅 Due: <strong>Mar 20, 2025</strong></span><span>📎 Max: <strong>15 marks</strong></span><span>👨‍🏫 Prof. Ramesh Iyer</span></div></div>
+            <div class="aacts"><button class="sbtn" style="background:rgba(248,113,113,0.12);color:var(--danger);border-color:rgba(248,113,113,0.3)">↑ Late Submit</button><span class="chip r">Overdue</span></div>
+          </div>
+          <div class="acard submitted" data-s="submitted">
+            <div><div class="asubj">CS-601 · CN & Security</div><div class="atitle">Network Topology Design — Campus LAN</div><div class="adesc">Design a complete campus LAN using Cisco Packet Tracer, including VLANs, subnetting, and firewall configuration.</div><div class="afooter"><span>📅 Submitted: <strong>Mar 18, 2025</strong></span><span>📎 Max: <strong>25 marks</strong></span><span>👨‍🏫 Dr. Anita Sharma</span></div></div>
+            <div class="aacts"><div class="grade">22/25</div><span class="chip g">Graded</span></div>
+          </div>
+          <div class="acard submitted" data-s="submitted">
+            <div><div class="asubj">CS-603 · Software Engineering</div><div class="atitle">SRS Document — E-Commerce Platform</div><div class="adesc">Prepare a complete SRS document as per IEEE 830 standard for a hypothetical platform.</div><div class="afooter"><span>📅 Submitted: <strong>Mar 12, 2025</strong></span><span>📎 Max: <strong>20 marks</strong></span><span>👨‍🏫 Prof. Sanjay Mehta</span></div></div>
+            <div class="aacts"><div class="grade">18/20</div><span class="chip g">Graded</span></div>
+          </div>
+          <div class="acard pending" data-s="pending">
+            <div><div class="asubj">HS-601 · Technical Communication</div><div class="atitle">Research Paper Presentation — AI in Healthcare</div><div class="adesc">Prepare a 15-minute presentation on recent advances in AI-driven diagnostics and treatment planning.</div><div class="afooter"><span>📅 Due: <strong>Apr 5, 2025</strong></span><span>📎 Max: <strong>30 marks</strong></span><span>👩‍🏫 Dr. Meena Pillai</span></div></div>
+            <div class="aacts"><button class="sbtn">↑ Submit</button><span class="chip o">Pending</span></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ════ SCREEN: ADMIN DASHBOARD ════ -->
+<div class="screen" id="screen-admin-dash">
+  <nav class="sidebar" id="sb-adm">
+    <div class="sidebar-logo"><span>EduPortal</span><small>ADMIN CONTROL PANEL</small></div>
+    <div class="sidebar-nav">
+      <div class="nav-lbl">Management</div>
+      <div class="nav-item aactive" onclick="showAdm('overview',this)"><span class="icon">📊</span> Overview</div>
+      <div class="nav-item" onclick="showAdm('students',this)"><span class="icon">🧑‍🎓</span> All Students</div>
+      <div class="nav-item" onclick="showAdm('regs',this)"><span class="icon">📋</span> Registrations <span class="nbadge p" id="reg-badge">0</span></div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="av-sm adm">AD</div>
+      <div class="sf-info"><div class="sf-name">Administrator</div><div class="sf-id">admin@greenwood.edu</div></div>
+      <button class="logout-btn" onclick="doLogout()" title="Logout">⏻</button>
+    </div>
+  </nav>
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" onclick="toggleSB('sb-adm')">☰</button>
+      <span class="tb-title" id="adm-tb">Admin Overview</span>
+      <span class="tb-pill p">Admin Mode</span>
+    </header>
+    <main class="content">
+
+      <!-- OVERVIEW -->
+      <section class="section active" id="sec-overview">
+        <h2 class="sec-h">Dashboard Overview</h2>
+        <p class="sec-sub">Institution-wide snapshot — Greenwood University</p>
+        <div class="astats">
+          <div class="astat"><div class="astat-icon">🧑‍🎓</div><div class="astat-val" id="st-total">0</div><div class="astat-lbl">Total Students</div></div>
+          <div class="astat"><div class="astat-icon">✅</div><div class="astat-val" id="st-active">0</div><div class="astat-lbl">Active Accounts</div></div>
+          <div class="astat"><div class="astat-icon">🆕</div><div class="astat-val" id="st-new">0</div><div class="astat-lbl">New This Month</div></div>
+          <div class="astat"><div class="astat-icon">🎓</div><div class="astat-val">4</div><div class="astat-lbl">Courses Running</div></div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);padding:24px;">
+          <h3 style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:16px;">Recent Registrations</h3>
+          <div id="recent-list"></div>
+        </div>
+      </section>
+
+      <!-- ALL STUDENTS -->
+      <section class="section" id="sec-students">
+        <h2 class="sec-h">All Students</h2>
+        <p class="sec-sub">Complete list of registered student accounts</p>
+        <div class="srch-bar"><input type="text" id="srch" placeholder="🔍  Search by name, username or course…" oninput="renderSTable()"/></div>
+        <div class="stable-wrap">
+          <div class="sth"><span>Student</span><span>Course</span><span>Year</span><span>Status</span><span>Actions</span></div>
+          <div id="stable-body"></div>
+        </div>
+      </section>
+
+      <!-- REGISTRATIONS -->
+      <section class="section" id="sec-regs">
+        <h2 class="sec-h">Student Registrations</h2>
+        <p class="sec-sub">All self-registered student accounts</p>
+        <div class="stable-wrap">
+          <div class="sth"><span>Student</span><span>Course</span><span>Year</span><span>Status</span><span>Actions</span></div>
+          <div id="regs-body"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+/* ─── STORAGE ─── */
+const ADMIN = {u:'admin',p:'admin123'};
+const DB_KEY = 'edu_v2_students';
+
+function getDB(){try{return JSON.parse(localStorage.getItem(DB_KEY)||'[]');}catch{return[];}}
+function saveDB(arr){localStorage.setItem(DB_KEY,JSON.stringify(arr));}
+function genId(){return 'STU-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);}
+function ini(name){return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();}
+
+/* ─── SCREEN NAV ─── */
+function goTo(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+/* ─── AUTH TABS ─── */
+function switchTab(t){
+  document.getElementById('tab-login').classList.toggle('active',t==='login');
+  document.getElementById('tab-reg').classList.toggle('active',t==='reg');
+  document.getElementById('form-login').style.display=t==='login'?'':'none';
+  document.getElementById('form-reg').style.display=t==='reg'?'':'none';
+  hide('s-err');hide('s-ok');
+}
+function show(id,msg,isOk){
+  const el=document.getElementById(id);
+  el.textContent=(isOk?'✓ ':'⚠ ')+msg;
+  el.style.display='block';
+}
+function hide(id){const el=document.getElementById(id);if(el)el.style.display='none';}
+
+/* ─── REGISTER ─── */
+function doRegister(){
+  hide('s-err');hide('s-ok');
+  const fn=v('r-fn'),ln=v('r-ln'),user=v('r-user'),email=v('r-email'),course=v('r-course'),year=gv('r-year'),pass=v('r-pass'),conf=v('r-conf');
+  if(!fn||!ln||!user||!email||!course)return show('s-err','All fields are required.');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return show('s-err','Please enter a valid email address.');
+  if(pass.length<6)return show('s-err','Password must be at least 6 characters.');
+  if(pass!==conf)return show('s-err','Passwords do not match.');
+  const db=getDB();
+  if(db.find(s=>s.username===user))return show('s-err','Username already taken. Try another.');
+  if(db.find(s=>s.email===email))return show('s-err','An account with this email already exists.');
+  const s={id:genId(),username:user,password:pass,name:fn+' '+ln,fname:fn,lname:ln,email,course,year,status:'active',createdAt:new Date().toISOString()};
+  db.push(s);saveDB(db);
+  show('s-ok','Account created! You can now login.',true);
+  ['r-fn','r-ln','r-user','r-email','r-course','r-pass','r-conf'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+  setTimeout(()=>switchTab('login'),1800);
+}
+
+/* ─── STUDENT LOGIN ─── */
+function doLogin(){
+  hide('s-err');hide('s-ok');
+  const user=v('l-user'),pass=v('l-pass');
+  if(!user||!pass)return show('s-err','Please enter your username and password.');
+  const s=getDB().find(s=>s.username===user&&s.password===pass);
+  if(!s)return show('s-err','Invalid username or password.');
+  fillStudentDash(s);
+  goTo('screen-student-dash');
+  document.getElementById('l-user').value='';
+  document.getElementById('l-pass').value='';
+}
+
+/* ─── FILL STUDENT DASH ─── */
+function fillStudentDash(s){
+  const i=ini(s.name);
+  setText('stu-av',i);setText('stu-nm',s.name);setText('stu-sid',s.id);
+  setText('id-av',i);setText('id-nm',s.name);setText('id-course',s.course);setText('id-yr',s.year);
+  setText('id-sid',s.id);setText('id-roll','CSE/24/'+s.id.slice(-3));
+  setText('id-iss',new Date(s.createdAt).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}));
+  setText('pav',i);setText('pnm',s.name);setText('psid',s.id);
+  setText('p-course',s.course);setText('p-yr',s.year+' (Sem 6)');
+  setText('p-fullname',s.name);setText('p-email',s.email);
+  // Reset to first tab
+  showSec('idcard',document.querySelector('#sb-stu .nav-item'));
+}
+
+/* ─── ADMIN LOGIN ─── */
+function doAdminLogin(){
+  hide('a-err');
+  if(v('a-user')!==ADMIN.u||v('a-pass')!==ADMIN.p){
+    return show('a-err','Invalid admin credentials. Try admin / admin123');
+  }
+  document.getElementById('a-user').value='';
+  document.getElementById('a-pass').value='';
+  refreshAdmin();
+  goTo('screen-admin-dash');
+}
+
+/* ─── ADMIN REFRESH ─── */
+function refreshAdmin(){
+  const db=getDB();
+  setText('st-total',db.length);
+  setText('st-active',db.filter(s=>s.status==='active').length);
+  const now=new Date();
+  setText('st-new',db.filter(s=>{const d=new Date(s.createdAt);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).length);
+  setText('reg-badge',db.length);
+  // Recent list
+  const el=document.getElementById('recent-list');
+  if(!db.length){el.innerHTML='<p style="color:var(--muted);font-size:0.88rem;">No registrations yet. Students who register will appear here.</p>';return;}
+  const rec=[...db].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,6);
+  el.innerHTML=rec.map(s=>`
+    <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);">
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),#7c5cd8);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:0.8rem;flex-shrink:0;">${ini(s.name)}</div>
+      <div style="flex:1;"><div style="font-weight:500;font-size:0.9rem;">${s.name}</div><div style="font-size:0.75rem;color:var(--muted);">${s.username} · ${s.course} · ${s.year}</div></div>
+      <div style="font-size:0.75rem;color:var(--muted);">${new Date(s.createdAt).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</div>
+      <span class="chip g" style="font-size:0.7rem;">Active</span>
+    </div>`).join('');
+  renderSTable();renderRegsTable();
+}
+
+function renderSTable(){
+  const q=(document.getElementById('srch')?.value||'').toLowerCase();
+  const rows=getDB().filter(s=>s.name.toLowerCase().includes(q)||s.username.toLowerCase().includes(q)||s.course.toLowerCase().includes(q));
+  const el=document.getElementById('stable-body');
+  if(!rows.length){el.innerHTML='<div style="padding:24px;color:var(--muted);font-size:0.88rem;">No students found.</div>';return;}
+  el.innerHTML=rows.map(s=>`
+    <div class="srow">
+      <div><div class="srow-name">${s.name}</div><div class="srow-id">@${s.username} · ${s.id}</div></div>
+      <span>${s.course}</span><span>${s.year}</span>
+      <span><span class="chip g" style="font-size:0.72rem;">Active</span></span>
+      <span style="display:flex;gap:6px;">
+        <button class="abtn" onclick="viewStu('${s.username}')">View</button>
+        <button class="abtn del" onclick="delStu('${s.username}')">Remove</button>
+      </span>
+    </div>`).join('');
+}
+
+function renderRegsTable(){
+  const rows=[...getDB()].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+  const el=document.getElementById('regs-body');
+  if(!rows.length){el.innerHTML='<div style="padding:24px;color:var(--muted);font-size:0.88rem;">No registrations yet.</div>';return;}
+  el.innerHTML=rows.map(s=>`
+    <div class="srow">
+      <div><div class="srow-name">${s.name}</div><div class="srow-id">${s.email} · ${new Date(s.createdAt).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</div></div>
+      <span>${s.course}</span><span>${s.year}</span>
+      <span><span class="chip g" style="font-size:0.72rem;">Active</span></span>
+      <span><button class="abtn del" onclick="delStu('${s.username}')">Remove</button></span>
+    </div>`).join('');
+}
+
+function viewStu(u){
+  const s=getDB().find(x=>x.username===u);
+  if(!s)return;
+  alert('Student Details\n\nName: '+s.name+'\nUsername: @'+s.username+'\nEmail: '+s.email+'\nCourse: '+s.course+'\nYear: '+s.year+'\nStudent ID: '+s.id+'\nRegistered: '+new Date(s.createdAt).toLocaleString());
+}
+function delStu(u){
+  if(!confirm('Permanently remove student account for @'+u+'?'))return;
+  saveDB(getDB().filter(s=>s.username!==u));
+  refreshAdmin();
+}
+
+/* ─── LOGOUT ─── */
+function doLogout(){goTo('screen-landing');}
+
+/* ─── SECTION NAV ─── */
+const STU_TITLES={idcard:'Student ID Card',personal:'Personal Data',documents:'Documents',fees:'Fees & Payments',assignments:'Assignments'};
+const ADM_TITLES={overview:'Admin Overview',students:'All Students',regs:'Student Registrations'};
+
+function showSec(id,navEl){
+  document.querySelectorAll('#screen-student-dash .section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('#sb-stu .nav-item').forEach(n=>n.classList.remove('active'));
+  const s=document.getElementById('sec-'+id);if(s)s.classList.add('active');
+  if(navEl)navEl.classList.add('active');
+  setText('stu-tb',STU_TITLES[id]||id);
+  closeSidebar();
+}
+function showAdm(id,navEl){
+  document.querySelectorAll('#screen-admin-dash .section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('#sb-adm .nav-item').forEach(n=>{n.classList.remove('active');n.classList.remove('aactive');});
+  const s=document.getElementById('sec-'+id);if(s)s.classList.add('active');
+  if(navEl)navEl.classList.add('aactive');
+  setText('adm-tb',ADM_TITLES[id]||id);
+  refreshAdmin();closeSidebar();
+}
+
+/* ─── SIDEBAR ─── */
+function toggleSB(id){document.getElementById(id).classList.toggle('open');document.getElementById('overlay').classList.toggle('show');}
+function closeSidebar(){document.querySelectorAll('.sidebar').forEach(s=>s.classList.remove('open'));document.getElementById('overlay').classList.remove('show');}
+
+/* ─── FILTER ASSIGNMENTS ─── */
+function filterA(s,btn){
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  document.querySelectorAll('.acard').forEach(c=>c.style.display=(s==='all'||c.dataset.s===s)?'':'none');
+}
+
+/* ─── UTILS ─── */
+function v(id){return(document.getElementById(id)?.value||'').trim();}
+function gv(id){const el=document.getElementById(id);return el?el.value:'';}
+function setText(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
+</script>
+</body>
+</html>
